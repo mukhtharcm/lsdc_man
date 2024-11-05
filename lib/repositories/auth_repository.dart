@@ -21,7 +21,9 @@ class AuthRepository {
 
     // Initialize PocketBase with the async store
     final pb = PocketBase(
-      'http://localhost:8090',
+      // Use 10.0.2.2 for Android emulator to access host machine's localhost
+      // Or use your machine's IP address for physical devices
+      'http://192.168.222.209:8090',
       authStore: store,
     );
 
