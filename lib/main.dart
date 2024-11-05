@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:lsdc_man/blocs/daily_entry/daily_entry_bloc.dart';
 import 'blocs/auth/auth_bloc.dart';
 import 'blocs/auth/auth_event.dart';
 import 'blocs/auth/auth_state.dart';
 import 'features/auth/screens/authenticated_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'repositories/auth_repository.dart';
+import 'repositories/daily_entry_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final getIt = GetIt.instance;
   // Initialize AuthRepository with persistent store
-  getIt.registerSingleton<AuthRepository>(
-    await AuthRepository.initialize(),
+  final authRepo = await AuthRepository.initialize();
+  getIt.registerSingleton<AuthRepository>(authRepo);
+
+  // Register DailyEntryRepository
+  getIt.registerSingleton<DailyEntryRepository>(
+    DailyEntryRepository(authRepo.pb),
   );
 
   runApp(const MainApp());
@@ -25,10 +31,19 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AuthBloc(
-        authRepository: GetIt.I<AuthRepository>(),
-      )..add(AuthCheckRequested()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => AuthBloc(
+            authRepository: GetIt.I<AuthRepository>(),
+          )..add(AuthCheckRequested()),
+        ),
+        BlocProvider(
+          create: (context) => DailyEntryBloc(
+            dailyEntryRepository: GetIt.I<DailyEntryRepository>(),
+          ),
+        ),
+      ],
       child: MaterialApp(
         home: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {

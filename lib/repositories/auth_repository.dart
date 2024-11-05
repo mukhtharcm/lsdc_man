@@ -72,4 +72,7 @@ class AuthRepository {
 
   // Listen to auth state changes
   Stream<AuthStoreEvent> get onAuthStateChange => _pb.authStore.onChange;
+
+  // Add this getter to AuthRepository
+  PocketBase get pb => _pb;
 }
