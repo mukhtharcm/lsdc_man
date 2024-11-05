@@ -5,6 +5,7 @@ import '../../../blocs/auth/auth_event.dart';
 import '../../../blocs/auth/auth_state.dart';
 import '../../../models/user_model.dart';
 import '../../daily_entry/screens/daily_entries_screen.dart';
+import '../../admin/screens/admin_dashboard.dart';
 
 class AuthenticatedScreen extends StatelessWidget {
   const AuthenticatedScreen({super.key});
@@ -28,7 +29,9 @@ class AuthenticatedScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: DailyEntriesScreen(userRole: user.role, teamId: user.teamId),
+          body: user.role == UserRole.admin
+              ? const AdminDashboard()
+              : DailyEntriesScreen(userRole: user.role, teamId: user.teamId),
         );
       },
     );

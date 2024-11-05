@@ -9,6 +9,8 @@ import 'features/auth/screens/authenticated_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/daily_entry_repository.dart';
+import 'blocs/team/team_bloc.dart';
+import 'repositories/team_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,11 @@ void main() async {
   // Register DailyEntryRepository
   getIt.registerSingleton<DailyEntryRepository>(
     DailyEntryRepository(authRepo.pb),
+  );
+
+  // Register TeamRepository
+  getIt.registerSingleton<TeamRepository>(
+    TeamRepository(authRepo.pb),
   );
 
   runApp(const MainApp());
@@ -42,6 +49,11 @@ class MainApp extends StatelessWidget {
           create: (context) => DailyEntryBloc(
             dailyEntryRepository: GetIt.I<DailyEntryRepository>(),
           ),
+        ),
+        BlocProvider(
+          create: (context) => TeamBloc(
+            teamRepository: GetIt.I<TeamRepository>(),
+          )..add(LoadTeams()),
         ),
       ],
       child: MaterialApp(
