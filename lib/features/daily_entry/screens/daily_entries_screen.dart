@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lsdc_man/config/theme.dart';
 import '../../../blocs/daily_entry/daily_entry_bloc.dart';
 import '../../../blocs/daily_entry/daily_entry_event.dart';
 import '../../../blocs/daily_entry/daily_entry_state.dart';
@@ -68,16 +69,27 @@ class _DailyEntriesScreenState extends State<DailyEntriesScreen> {
                   itemBuilder: (context, index) {
                     final entry = state.entries[index];
                     return Card(
-                      margin: const EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.all(AppTheme.paddingSmall),
                       child: ListTile(
                         title: Text(
-                            'Date: ${entry.date.toLocal().toString().split(' ')[0]}'),
+                          'Date: ${entry.date.toLocal().toString().split(' ')[0]}',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Calendars: ${entry.noOfCalendar}'),
-                            Text('Sold: ${entry.soldNo}'),
-                            Text('Balance: ${entry.balance}'),
+                            Text(
+                              'Calendars: ${entry.noOfCalendar}',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            Text(
+                              'Sold: ${entry.soldNo}',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            Text(
+                              'Balance: ${entry.balance}',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ],
                         ),
                         trailing: _buildEntryActions(entry.id),

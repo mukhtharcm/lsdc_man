@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lsdc_man/config/theme.dart';
 import '../../../blocs/team/team_bloc.dart';
-import '../../../models/team.dart';
+
 import 'team_details_screen.dart';
 
 class AdminDashboard extends StatelessWidget {
@@ -24,10 +25,16 @@ class AdminDashboard extends StatelessWidget {
           itemBuilder: (context, index) {
             final team = state.teams[index];
             return Card(
-              margin: const EdgeInsets.all(8.0),
+              margin: const EdgeInsets.all(AppTheme.paddingSmall),
               child: ListTile(
-                title: Text(team.name),
-                subtitle: Text('Managers: ${team.managerIds.length}'),
+                title: Text(
+                  team.name,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                subtitle: Text(
+                  'Managers: ${team.managerIds.length}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 onTap: () {
                   Navigator.push(
                     context,

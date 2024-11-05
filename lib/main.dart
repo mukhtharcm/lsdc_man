@@ -11,6 +11,7 @@ import 'repositories/auth_repository.dart';
 import 'repositories/daily_entry_repository.dart';
 import 'blocs/team/team_bloc.dart';
 import 'repositories/team_repository.dart';
+import 'config/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,6 +58,9 @@ class MainApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
         home: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             return switch (state.status) {

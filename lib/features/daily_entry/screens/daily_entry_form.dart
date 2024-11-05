@@ -7,6 +7,7 @@ import '../../../blocs/auth/auth_state.dart';
 import '../../../blocs/daily_entry/daily_entry_bloc.dart';
 import '../../../blocs/daily_entry/daily_entry_event.dart';
 import '../../../models/daily_entry.dart';
+import '../../../config/theme.dart';
 
 class DailyEntryForm extends StatefulWidget {
   final DailyEntry? entry;
@@ -84,22 +85,26 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
                     ]),
                   ),
                   const Divider(height: 32),
-                  const Text(
-                    'Denominations',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Denominations',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        _buildDenominationField('d500', '₹500'),
+                        _buildDenominationField('d200', '₹200'),
+                        _buildDenominationField('d100', '₹100'),
+                        _buildDenominationField('d50', '₹50'),
+                        _buildDenominationField('d20', '₹20'),
+                        _buildDenominationField('d10', '₹10'),
+                        _buildDenominationField('d5', '₹5'),
+                        _buildDenominationField('d2', '₹2'),
+                        _buildDenominationField('d1', '₹1'),
+                      ],
                     ),
                   ),
-                  _buildDenominationField('d500', '₹500'),
-                  _buildDenominationField('d200', '₹200'),
-                  _buildDenominationField('d100', '₹100'),
-                  _buildDenominationField('d50', '₹50'),
-                  _buildDenominationField('d20', '₹20'),
-                  _buildDenominationField('d10', '₹10'),
-                  _buildDenominationField('d5', '₹5'),
-                  _buildDenominationField('d2', '₹2'),
-                  _buildDenominationField('d1', '₹1'),
                   const Divider(height: 32),
                   FormBuilderTextField(
                     name: 'expense',
