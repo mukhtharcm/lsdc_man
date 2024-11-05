@@ -33,7 +33,7 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
             title: Text(widget.entry == null ? 'New Entry' : 'Edit Entry'),
           ),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(AppTheme.paddingMedium),
             child: FormBuilder(
               key: _formKey,
               initialValue: {
@@ -53,86 +53,25 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
                 'batta': widget.entry?.batta.toString() ?? '0',
               },
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FormBuilderDateTimePicker(
-                    name: 'date',
-                    inputType: InputType.date,
-                    decoration: const InputDecoration(
-                      labelText: 'Date',
-                    ),
-                    validator: FormBuilderValidators.required(),
-                  ),
-                  FormBuilderTextField(
-                    name: 'no_of_calendar',
-                    decoration: const InputDecoration(
-                      labelText: 'Number of Calendars',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.numeric(),
-                    ]),
-                  ),
-                  FormBuilderTextField(
-                    name: 'sold_no',
-                    decoration: const InputDecoration(
-                      labelText: 'Sold Number',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.numeric(),
-                    ]),
-                  ),
-                  const Divider(height: 32),
-                  Padding(
-                    padding: const EdgeInsets.all(AppTheme.paddingMedium),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Denominations',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        _buildDenominationField('d500', '₹500'),
-                        _buildDenominationField('d200', '₹200'),
-                        _buildDenominationField('d100', '₹100'),
-                        _buildDenominationField('d50', '₹50'),
-                        _buildDenominationField('d20', '₹20'),
-                        _buildDenominationField('d10', '₹10'),
-                        _buildDenominationField('d5', '₹5'),
-                        _buildDenominationField('d2', '₹2'),
-                        _buildDenominationField('d1', '₹1'),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 32),
-                  FormBuilderTextField(
-                    name: 'expense',
-                    decoration: const InputDecoration(
-                      labelText: 'Expense',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.numeric(),
-                    ]),
-                  ),
-                  FormBuilderTextField(
-                    name: 'batta',
-                    decoration: const InputDecoration(
-                      labelText: 'Batta',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(),
-                      FormBuilderValidators.numeric(),
-                    ]),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
+                  _buildBasicInfoSection(),
+                  const SizedBox(height: AppTheme.paddingLarge),
+                  _buildDenominationsSection(),
+                  const SizedBox(height: AppTheme.paddingLarge),
+                  _buildOtherDetailsSection(),
+                  const SizedBox(height: AppTheme.paddingLarge),
+                  FilledButton(
                     onPressed: _submitForm,
-                    child: Text(
-                      widget.entry == null ? 'Create Entry' : 'Update Entry',
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                      child: Text(
+                        widget.entry == null ? 'Create Entry' : 'Update Entry',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                ),
+                      ),
                     ),
                   ),
                 ],
@@ -144,11 +83,152 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
     );
   }
 
+  Widget _buildBasicInfoSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.paddingMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Basic Information',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: AppTheme.paddingMedium),
+            FormBuilderDateTimePicker(
+              name: 'date',
+              inputType: InputType.date,
+              decoration: const InputDecoration(
+                labelText: 'Date',
+                prefixIcon: Icon(Icons.calendar_today),
+              ),
+              validator: FormBuilderValidators.required(),
+            ),
+            const SizedBox(height: AppTheme.paddingMedium),
+            FormBuilderTextField(
+              name: 'no_of_calendar',
+              decoration: const InputDecoration(
+                labelText: 'Number of Calendars',
+                prefixIcon: Icon(Icons.calendar_view_month),
+              ),
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+                FormBuilderValidators.numeric(),
+              ]),
+            ),
+            const SizedBox(height: AppTheme.paddingMedium),
+            FormBuilderTextField(
+              name: 'sold_no',
+              decoration: const InputDecoration(
+                labelText: 'Sold Number',
+                prefixIcon: Icon(Icons.sell),
+              ),
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+                FormBuilderValidators.numeric(),
+              ]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDenominationsSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.paddingMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Denominations',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: AppTheme.paddingMedium),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              mainAxisSpacing: AppTheme.paddingSmall,
+              crossAxisSpacing: AppTheme.paddingSmall,
+              childAspectRatio: 2.5,
+              children: [
+                _buildDenominationField('d500', '₹500'),
+                _buildDenominationField('d200', '₹200'),
+                _buildDenominationField('d100', '₹100'),
+                _buildDenominationField('d50', '₹50'),
+                _buildDenominationField('d20', '₹20'),
+                _buildDenominationField('d10', '₹10'),
+                _buildDenominationField('d5', '₹5'),
+                _buildDenominationField('d2', '₹2'),
+                _buildDenominationField('d1', '₹1'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOtherDetailsSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.paddingMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Other Details',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: AppTheme.paddingMedium),
+            FormBuilderTextField(
+              name: 'expense',
+              decoration: const InputDecoration(
+                labelText: 'Expense',
+                prefixIcon: Icon(Icons.money_off),
+              ),
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+                FormBuilderValidators.numeric(),
+              ]),
+            ),
+            const SizedBox(height: AppTheme.paddingMedium),
+            FormBuilderTextField(
+              name: 'batta',
+              decoration: const InputDecoration(
+                labelText: 'Batta',
+                prefixIcon: Icon(Icons.payments),
+              ),
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+                FormBuilderValidators.numeric(),
+              ]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDenominationField(String name, String label) {
     return FormBuilderTextField(
       name: name,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: const Icon(Icons.currency_rupee),
+      ),
       keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.next,
       validator: FormBuilderValidators.compose([
         FormBuilderValidators.required(),
         FormBuilderValidators.numeric(),
@@ -181,7 +261,7 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
         d1: int.parse(values['d1']),
         expense: double.parse(values['expense']),
         batta: double.parse(values['batta']),
-        balance: 0, // We can calculate this based on denominations
+        balance: 0, // Calculate based on denominations
       );
 
       if (widget.entry == null) {
