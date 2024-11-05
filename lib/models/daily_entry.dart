@@ -8,9 +8,8 @@ class DailyEntry extends Equatable {
   final Team team;
   final DateTime date;
   final int noOfCalendar;
-  final int calendars; // Number of calendars sold
+  final int soldNo;
   final int balance;
-  // Denominations as separate fields
   final int d500;
   final int d200;
   final int d100;
@@ -29,7 +28,7 @@ class DailyEntry extends Equatable {
     required this.team,
     required this.date,
     required this.noOfCalendar,
-    required this.calendars,
+    required this.soldNo,
     required this.balance,
     required this.d500,
     required this.d200,
@@ -64,7 +63,7 @@ class DailyEntry extends Equatable {
         team,
         date,
         noOfCalendar,
-        calendars,
+        soldNo,
         balance,
         d500,
         d200,
@@ -86,7 +85,7 @@ class DailyEntry extends Equatable {
       team: Team.fromMap(map['expand']['team']),
       date: DateTime.parse(map['date']),
       noOfCalendar: map['no_of_calendar'],
-      calendars: map['calendars'],
+      soldNo: map['sold_no'],
       balance: map['balance'],
       d500: map['d500'],
       d200: map['d200'],
@@ -108,7 +107,7 @@ class DailyEntry extends Equatable {
       'team': team.id,
       'date': date.toIso8601String(),
       'no_of_calendar': noOfCalendar,
-      'calendars': calendars,
+      'sold_no': soldNo,
       'balance': balance,
       'd500': d500,
       'd200': d200,
