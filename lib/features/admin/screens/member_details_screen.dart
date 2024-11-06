@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lsdc_man/blocs/auth/auth_bloc.dart';
+import 'package:lsdc_man/blocs/auth/auth_state.dart';
 import '../../../blocs/daily_entry/daily_entry_bloc.dart';
 import '../../../blocs/daily_entry/daily_entry_event.dart';
 import '../../../blocs/daily_entry/daily_entry_state.dart';
@@ -51,6 +53,29 @@ class _MemberDetailsScreenState extends State<MemberDetailsScreen> {
             ),
           ],
         ),
+        actions: [
+          BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              final currentUser = state.user;
+              if (currentUser?.role == UserRole.admin ||
+                  (currentUser?.role == UserRole.teamManager &&
+                      currentUser?.team == widget.member.team)) {
+                return BlocBuilder<DailyEntryBloc, DailyEntryState>(
+                  builder: (context, state) {
+                    if (state.currentEntry != null) {
+                      return IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: _showDeleteConfirmation,
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                );
+              }
+              return const SizedBox();
+            },
+          ),
+        ],
       ),
       body: BlocBuilder<DailyEntryBloc, DailyEntryState>(
         builder: (context, state) {
@@ -89,25 +114,42 @@ class _MemberDetailsScreenState extends State<MemberDetailsScreen> {
                   'Today\'s Summary',
                   [
                     _buildInfoRow(
-                        'Calendars', todayEntry.noOfCalendar.toString()),
+                        'Total Calendars', todayEntry.noOfCalendar.toString()),
                     _buildInfoRow('Sold', todayEntry.soldNo.toString()),
                     _buildInfoRow(
-                        'Balance', '₹${todayEntry.balance.toStringAsFixed(2)}'),
+                      'Remaining',
+                      todayEntry.balance.toInt().toString(),
+                      isHighlighted: true,
+                    ),
                   ],
                 ),
                 const SizedBox(height: AppTheme.paddingLarge),
                 _buildSection(
-                  'Denominations',
+                  'Collection Details',
                   [
-                    _buildInfoRow('₹500', todayEntry.d500.toString()),
-                    _buildInfoRow('₹200', todayEntry.d200.toString()),
-                    _buildInfoRow('₹100', todayEntry.d100.toString()),
-                    _buildInfoRow('₹50', todayEntry.d50.toString()),
-                    _buildInfoRow('₹20', todayEntry.d20.toString()),
-                    _buildInfoRow('₹10', todayEntry.d10.toString()),
-                    _buildInfoRow('₹5', todayEntry.d5.toString()),
-                    _buildInfoRow('₹2', todayEntry.d2.toString()),
-                    _buildInfoRow('₹1', todayEntry.d1.toString()),
+                    _buildInfoRow('₹500 × ${todayEntry.d500}',
+                        '₹${todayEntry.d500 * 500}'),
+                    _buildInfoRow('₹200 × ${todayEntry.d200}',
+                        '₹${todayEntry.d200 * 200}'),
+                    _buildInfoRow('₹100 × ${todayEntry.d100}',
+                        '₹${todayEntry.d100 * 100}'),
+                    _buildInfoRow(
+                        '₹50 × ${todayEntry.d50}', '₹${todayEntry.d50 * 50}'),
+                    _buildInfoRow(
+                        '₹20 × ${todayEntry.d20}', '₹${todayEntry.d20 * 20}'),
+                    _buildInfoRow(
+                        '₹10 × ${todayEntry.d10}', '₹${todayEntry.d10 * 10}'),
+                    _buildInfoRow(
+                        '₹5 × ${todayEntry.d5}', '₹${todayEntry.d5 * 5}'),
+                    _buildInfoRow(
+                        '₹2 × ${todayEntry.d2}', '₹${todayEntry.d2 * 2}'),
+                    _buildInfoRow('₹1 × ${todayEntry.d1}', '₹${todayEntry.d1}'),
+                    const Divider(height: AppTheme.paddingLarge),
+                    _buildInfoRow(
+                      'Total Collection',
+                      '₹${todayEntry.calculateTotal()}',
+                      isHighlighted: true,
+                    ),
                   ],
                 ),
                 const SizedBox(height: AppTheme.paddingLarge),
@@ -139,6 +181,41 @@ class _MemberDetailsScreenState extends State<MemberDetailsScreen> {
     ).then((_) => _loadTodayEntry()); // Reload after form submission
   }
 
+  void _showDeleteConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Entry'),
+        content: const Text('Are you sure you want to delete this entry?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () {
+              final entry = context.read<DailyEntryBloc>().state.currentEntry;
+              if (entry != null) {
+                context.read<DailyEntryBloc>().add(DeleteDailyEntry(entry.id));
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Go back to previous screen
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSection(String title, List<Widget> children) {
     return Card(
       child: Padding(
@@ -158,7 +235,8 @@ class _MemberDetailsScreenState extends State<MemberDetailsScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value,
+      {bool isHighlighted = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -171,7 +249,10 @@ class _MemberDetailsScreenState extends State<MemberDetailsScreen> {
           Text(
             value,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: isHighlighted ? FontWeight.bold : null,
+                  color: isHighlighted
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
                 ),
           ),
         ],

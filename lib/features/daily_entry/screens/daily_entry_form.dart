@@ -26,6 +26,52 @@ class DailyEntryForm extends StatefulWidget {
 
 class _DailyEntryFormState extends State<DailyEntryForm> {
   final _formKey = GlobalKey<FormBuilderState>();
+  double _currentTotal = 0;
+  double _averagePerCalendar = 0;
+
+  void _updateCalculations() {
+    final form = _formKey.currentState;
+    if (form == null) return;
+
+    try {
+      final d500 =
+          int.tryParse(form.fields['d500']?.value?.toString() ?? '0') ?? 0;
+      final d200 =
+          int.tryParse(form.fields['d200']?.value?.toString() ?? '0') ?? 0;
+      final d100 =
+          int.tryParse(form.fields['d100']?.value?.toString() ?? '0') ?? 0;
+      final d50 =
+          int.tryParse(form.fields['d50']?.value?.toString() ?? '0') ?? 0;
+      final d20 =
+          int.tryParse(form.fields['d20']?.value?.toString() ?? '0') ?? 0;
+      final d10 =
+          int.tryParse(form.fields['d10']?.value?.toString() ?? '0') ?? 0;
+      final d5 = int.tryParse(form.fields['d5']?.value?.toString() ?? '0') ?? 0;
+      final d2 = int.tryParse(form.fields['d2']?.value?.toString() ?? '0') ?? 0;
+      final d1 = int.tryParse(form.fields['d1']?.value?.toString() ?? '0') ?? 0;
+
+      final total = (d500 * 500) +
+          (d200 * 200) +
+          (d100 * 100) +
+          (d50 * 50) +
+          (d20 * 20) +
+          (d10 * 10) +
+          (d5 * 5) +
+          (d2 * 2) +
+          (d1 * 1).toDouble();
+
+      final soldNo =
+          int.tryParse(form.fields['sold_no']?.value?.toString() ?? '0') ?? 0;
+      final average = soldNo > 0 ? total / soldNo : 0;
+
+      setState(() {
+        _currentTotal = total;
+        _averagePerCalendar = average.toDouble();
+      });
+    } catch (e) {
+      debugPrint('Error calculating totals: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +88,7 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
             padding: const EdgeInsets.all(AppTheme.paddingMedium),
             child: FormBuilder(
               key: _formKey,
+              onChanged: () => _updateCalculations(),
               initialValue: {
                 'date': widget.entry?.date ?? DateTime.now(),
                 'no_of_calendar': widget.entry?.noOfCalendar.toString() ?? '',
@@ -61,6 +108,58 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Total Collection',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              Text(
+                                '₹${_currentTotal.toStringAsFixed(2)}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: AppTheme.paddingLarge),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Average per Calendar',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              Text(
+                                '₹${_averagePerCalendar.toStringAsFixed(2)}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.paddingLarge),
                   _buildBasicInfoSection(),
                   const SizedBox(height: AppTheme.paddingLarge),
                   _buildDenominationsSection(),
@@ -251,13 +350,16 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
 
       if (targetUser == null || targetUser.team == null) return;
 
-      final entry = DailyEntry(
+      final noOfCalendar = int.parse(values['no_of_calendar']);
+      final soldNo = int.parse(values['sold_no']);
+
+      final entry = DailyEntry.create(
         id: widget.entry?.id ?? '',
         userId: targetUser.id,
         teamId: targetUser.team!,
         date: values['date'] as DateTime,
-        noOfCalendar: int.parse(values['no_of_calendar']),
-        soldNo: int.parse(values['sold_no']),
+        noOfCalendar: noOfCalendar,
+        soldNo: soldNo,
         d500: int.parse(values['d500']),
         d200: int.parse(values['d200']),
         d100: int.parse(values['d100']),
@@ -269,7 +371,6 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
         d1: int.parse(values['d1']),
         expense: double.parse(values['expense']),
         batta: double.parse(values['batta']),
-        balance: 0, // Calculate based on denominations
       );
 
       if (widget.entry == null) {
