@@ -9,15 +9,23 @@ class DailyEntryRepository {
 
   Future<List<DailyEntry>> getEntries({
     String? teamId,
+    String? userId,
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
-    final filter = [
-      if (teamId != null) 'team = "$teamId"',
-      if (fromDate != null)
-        'date >= "${fromDate.toIso8601String().split('T')[0]}"',
-      if (toDate != null) 'date <= "${toDate.toIso8601String().split('T')[0]}"',
-    ].join(' && ');
+    final filters = <String>[];
+
+    if (teamId != null) filters.add('team = "$teamId"');
+    if (userId != null) filters.add('user = "$userId"');
+
+    if (fromDate != null) {
+      filters.add('date >= "${fromDate.toIso8601String().split('T')[0]}"');
+    }
+    if (toDate != null) {
+      filters.add('date <= "${toDate.toIso8601String().split('T')[0]}"');
+    }
+
+    final filter = filters.join(' && ');
 
     final records = await _pb.collection(_collectionName).getList(
           filter: filter.isEmpty ? null : filter,
@@ -53,6 +61,25 @@ class DailyEntryRepository {
     try {
       final records = await _pb.collection(_collectionName).getList(
             filter: 'team = "$teamId" && date = "$dateStr"',
+          );
+
+      if (records.items.isEmpty) return null;
+      return DailyEntry.fromRecord(records.items.first);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<DailyEntry?> getTodayEntryForUser(String userId) async {
+    final today = DateTime.now();
+    final dateStr = today.toIso8601String().split('T')[0];
+
+    try {
+      final records = await _pb.collection(_collectionName).getList(
+            filter: 'user = "$userId" && date = "$dateStr"',
+            sort: '-created',
+            page: 1,
+            perPage: 1,
           );
 
       if (records.items.isEmpty) return null;

@@ -20,32 +20,46 @@ class AdminDashboard extends StatelessWidget {
           return Center(child: Text('Error: ${state.error}'));
         }
 
-        return ListView.builder(
-          itemCount: state.teams.length,
-          itemBuilder: (context, index) {
-            final team = state.teams[index];
-            return Card(
-              margin: const EdgeInsets.all(AppTheme.paddingSmall),
-              child: ListTile(
-                title: Text(
-                  team.name,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                subtitle: Text(
-                  'Managers: ${team.managerIds.length}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TeamDetailsScreen(teamId: team.id),
+        return Padding(
+          padding: const EdgeInsets.all(AppTheme.paddingMedium),
+          child: ListView.separated(
+            itemCount: state.teams.length,
+            separatorBuilder: (context, index) =>
+                const SizedBox(height: AppTheme.paddingSmall),
+            itemBuilder: (context, index) {
+              final team = state.teams[index];
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      team.name,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                  );
-                },
-              ),
-            );
-          },
+                    subtitle: Padding(
+                      padding:
+                          const EdgeInsets.only(top: AppTheme.paddingSmall),
+                      child: Text(
+                        'Managers: ${team.managerIds.length}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TeamDetailsScreen(teamId: team.id),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
         );
       },
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:lsdc_man/models/user_model.dart';
 import '../../../blocs/auth/auth_bloc.dart';
 import '../../../blocs/auth/auth_state.dart';
 import '../../../blocs/daily_entry/daily_entry_bloc.dart';
@@ -11,8 +12,13 @@ import '../../../config/theme.dart';
 
 class DailyEntryForm extends StatefulWidget {
   final DailyEntry? entry;
+  final User? selectedUser;
 
-  const DailyEntryForm({super.key, this.entry});
+  const DailyEntryForm({
+    super.key,
+    this.entry,
+    this.selectedUser,
+  });
 
   @override
   State<DailyEntryForm> createState() => _DailyEntryFormState();
@@ -239,14 +245,16 @@ class _DailyEntryFormState extends State<DailyEntryForm> {
   void _submitForm() {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final values = _formKey.currentState!.value;
-      final user = context.read<AuthBloc>().state.user;
+      final authUser = context.read<AuthBloc>().state.user;
 
-      if (user == null) return;
+      final targetUser = widget.selectedUser ?? authUser;
+
+      if (targetUser == null || targetUser.team == null) return;
 
       final entry = DailyEntry(
         id: widget.entry?.id ?? '',
-        userId: user.id,
-        teamId: user.teamId ?? '',
+        userId: targetUser.id,
+        teamId: targetUser.team!,
         date: values['date'] as DateTime,
         noOfCalendar: int.parse(values['no_of_calendar']),
         soldNo: int.parse(values['sold_no']),

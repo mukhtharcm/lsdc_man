@@ -8,17 +8,19 @@ abstract class DailyEntryEvent extends Equatable {
 
 class LoadDailyEntries extends DailyEntryEvent {
   final String? teamId;
+  final String? userId;
   final DateTime? fromDate;
   final DateTime? toDate;
 
   LoadDailyEntries({
     this.teamId,
+    this.userId,
     this.fromDate,
     this.toDate,
   });
 
   @override
-  List<Object?> get props => [teamId, fromDate, toDate];
+  List<Object?> get props => [teamId, userId, fromDate, toDate];
 }
 
 class CreateDailyEntry extends DailyEntryEvent {

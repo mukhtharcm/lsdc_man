@@ -29,15 +29,13 @@ class _MemberDetailsScreenState extends State<MemberDetailsScreen> {
   }
 
   void _loadTodayEntry() {
-    if (widget.member.teamId != null) {
-      context.read<DailyEntryBloc>().add(
-            LoadDailyEntries(
-              teamId: widget.member.teamId,
-              fromDate: DateTime.now(),
-              toDate: DateTime.now(),
-            ),
-          );
-    }
+    context.read<DailyEntryBloc>().add(
+          LoadDailyEntries(
+            userId: widget.member.id,
+            fromDate: DateTime.now(),
+            toDate: DateTime.now(),
+          ),
+        );
   }
 
   @override
@@ -138,7 +136,9 @@ class _MemberDetailsScreenState extends State<MemberDetailsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const DailyEntryForm(),
+        builder: (context) => DailyEntryForm(
+          selectedUser: widget.member,
+        ),
       ),
     ).then((_) => _loadTodayEntry()); // Reload after form submission
   }

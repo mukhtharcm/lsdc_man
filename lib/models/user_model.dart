@@ -7,14 +7,14 @@ class User extends Equatable {
   final String id;
   final String email;
   final String? name;
-  final String? teamId;
+  final String? team;
   final UserRole? role;
 
   const User({
     required this.id,
     required this.email,
     this.name,
-    this.teamId,
+    this.team,
     this.role,
   });
 
@@ -23,7 +23,7 @@ class User extends Equatable {
       id: record.id,
       email: record.getStringValue('email'),
       name: record.getStringValue('name'),
-      teamId: record.getStringValue('team'),
+      team: record.getStringValue('team'),
       role: _parseRole(record.getStringValue('role')),
     );
   }
@@ -42,5 +42,5 @@ class User extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, email, name, teamId, role];
+  List<Object?> get props => [id, email, name, team, role];
 }

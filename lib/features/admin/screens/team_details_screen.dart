@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lsdc_man/config/theme.dart';
 import '../../../blocs/team/team_bloc.dart';
 import '../../../models/user_model.dart';
 import 'member_details_screen.dart';
@@ -41,29 +42,38 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> {
           appBar: AppBar(
             title: Text(team.name),
           ),
-          body: ListView.builder(
-            itemCount: team.members?.length ?? 0,
-            itemBuilder: (context, index) {
-              final member = team.members![index];
-              return Card(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                child: ListTile(
-                  title: Text(
-                    member.name ?? member.email,
-                    style: Theme.of(context).textTheme.titleMedium,
+          body: Padding(
+            padding: const EdgeInsets.all(AppTheme.paddingMedium),
+            child: ListView.separated(
+              itemCount: team.members?.length ?? 0,
+              separatorBuilder: (context, index) =>
+                  const SizedBox(height: AppTheme.paddingSmall),
+              itemBuilder: (context, index) {
+                final member = team.members![index];
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        member.name ?? member.email,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      subtitle: Padding(
+                        padding:
+                            const EdgeInsets.only(top: AppTheme.paddingSmall),
+                        child: Text(
+                          _getRoleText(member.role),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _navigateToMemberDetails(member, team.name),
+                    ),
                   ),
-                  subtitle: Text(
-                    _getRoleText(member.role),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _navigateToMemberDetails(member, team.name),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         );
       },

@@ -31,7 +31,9 @@ class AuthenticatedScreen extends StatelessWidget {
           ),
           body: user.role == UserRole.admin
               ? const AdminDashboard()
-              : DailyEntriesScreen(userRole: user.role, teamId: user.teamId),
+              : DailyEntriesScreen(
+                  userRole: user.role,
+                ),
         );
       },
     );
