@@ -11,6 +11,7 @@ class DailyEntryBloc extends Bloc<DailyEntryEvent, DailyEntryState> {
   })  : _dailyEntryRepository = dailyEntryRepository,
         super(const DailyEntryState()) {
     on<LoadDailyEntries>(_onLoadDailyEntries);
+    on<LoadUserTodayEntry>(_onLoadUserTodayEntry);
     on<CreateDailyEntry>(_onCreateDailyEntry);
     on<UpdateDailyEntry>(_onUpdateDailyEntry);
     on<DeleteDailyEntry>(_onDeleteDailyEntry);
@@ -21,19 +22,44 @@ class DailyEntryBloc extends Bloc<DailyEntryEvent, DailyEntryState> {
     LoadDailyEntries event,
     Emitter<DailyEntryState> emit,
   ) async {
-    emit(state.copyWith(status: DailyEntryStatus.loading));
+    emit(const DailyEntryState(status: DailyEntryStatus.loading));
     try {
       final entries = await _dailyEntryRepository.getEntries(
         teamId: event.teamId,
+        userId: event.userId,
         fromDate: event.fromDate,
         toDate: event.toDate,
       );
-      emit(state.copyWith(
+      emit(DailyEntryState(
         status: DailyEntryStatus.success,
         entries: entries,
       ));
     } catch (e) {
-      emit(state.copyWith(
+      emit(DailyEntryState(
+        status: DailyEntryStatus.failure,
+        error: e.toString(),
+      ));
+    }
+  }
+
+  Future<void> _onLoadUserTodayEntry(
+    LoadUserTodayEntry event,
+    Emitter<DailyEntryState> emit,
+  ) async {
+    emit(const DailyEntryState(status: DailyEntryStatus.loading));
+    try {
+      final entry =
+          await _dailyEntryRepository.getTodayEntryForUser(event.userId);
+      if (entry != null) {
+        emit(DailyEntryState(
+          status: DailyEntryStatus.success,
+          currentEntry: entry,
+        ));
+      } else {
+        emit(const DailyEntryState(status: DailyEntryStatus.success));
+      }
+    } catch (e) {
+      emit(DailyEntryState(
         status: DailyEntryStatus.failure,
         error: e.toString(),
       ));

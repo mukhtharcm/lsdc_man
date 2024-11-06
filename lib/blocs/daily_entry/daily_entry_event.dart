@@ -60,3 +60,12 @@ class CheckDailyEntryExists extends DailyEntryEvent {
   @override
   List<Object?> get props => [teamId, date];
 }
+
+class LoadUserTodayEntry extends DailyEntryEvent {
+  final String userId;
+
+  LoadUserTodayEntry(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
+}

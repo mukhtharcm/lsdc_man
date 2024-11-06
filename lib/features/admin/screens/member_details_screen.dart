@@ -30,11 +30,7 @@ class _MemberDetailsScreenState extends State<MemberDetailsScreen> {
 
   void _loadTodayEntry() {
     context.read<DailyEntryBloc>().add(
-          LoadDailyEntries(
-            userId: widget.member.id,
-            fromDate: DateTime.now(),
-            toDate: DateTime.now(),
-          ),
+          LoadUserTodayEntry(widget.member.id),
         );
   }
 
@@ -62,7 +58,7 @@ class _MemberDetailsScreenState extends State<MemberDetailsScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final todayEntry = state.entries.isEmpty ? null : state.entries.first;
+          final todayEntry = state.currentEntry;
 
           if (todayEntry == null) {
             return Center(

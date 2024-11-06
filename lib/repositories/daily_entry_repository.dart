@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 import '../models/daily_entry.dart';
 
@@ -72,11 +73,13 @@ class DailyEntryRepository {
 
   Future<DailyEntry?> getTodayEntryForUser(String userId) async {
     final today = DateTime.now();
-    final dateStr = today.toIso8601String().split('T')[0];
+    final startOfDay = "${today.toIso8601String().split('T')[0]} 00:00:00.000Z";
+    final endOfDay = "${today.toIso8601String().split('T')[0]} 23:59:59.999Z";
 
     try {
       final records = await _pb.collection(_collectionName).getList(
-            filter: 'user = "$userId" && date = "$dateStr"',
+            filter:
+                'user = "$userId" && date >= "$startOfDay" && date <= "$endOfDay"',
             sort: '-created',
             page: 1,
             perPage: 1,
@@ -85,6 +88,7 @@ class DailyEntryRepository {
       if (records.items.isEmpty) return null;
       return DailyEntry.fromRecord(records.items.first);
     } catch (e) {
+      debugPrint('Error getting today entry: $e');
       return null;
     }
   }
