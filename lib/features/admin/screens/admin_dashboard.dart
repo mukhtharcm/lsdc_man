@@ -135,69 +135,76 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     final summary = state.teamSummaries[team.id];
 
                     return Card(
-                      child: Column(
-                        children: [
-                          ListTile(
-                            contentPadding:
-                                const EdgeInsets.all(AppTheme.paddingMedium),
-                            title: Text(
-                              team.name,
-                              style: Theme.of(context).textTheme.titleLarge,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  TeamDetailsScreen(teamId: team.id),
                             ),
-                            subtitle: Text(
-                              'Members Reported: ${summary?.entriesCount ?? 0}',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamDetailsScreen(teamId: team.id),
-                                ),
-                              );
-                            },
-                          ),
-                          if (summary != null) ...[
-                            const Divider(height: 1),
-                            Padding(
-                              padding:
+                          );
+                        },
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusMedium),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              contentPadding:
                                   const EdgeInsets.all(AppTheme.paddingMedium),
-                              child: Column(
-                                children: [
-                                  _buildSummaryRow(
-                                    'Total Collection',
-                                    '₹${summary.totalCollection.toStringAsFixed(2)}',
-                                    isHighlighted: true,
-                                    iconData: Icons.account_balance_wallet,
-                                  ),
-                                  const SizedBox(height: AppTheme.paddingSmall),
-                                  _buildSummaryRow(
-                                    'Calendars Sold',
-                                    summary.totalSold.toString(),
-                                    iconData: Icons.calendar_today,
-                                  ),
-                                  const SizedBox(height: AppTheme.paddingSmall),
-                                  _buildSummaryRow(
-                                    'Average per Calendar',
-                                    '₹${summary.averagePerCalendar.toStringAsFixed(2)}',
-                                    iconData: Icons.trending_up,
-                                    isHighlighted: true,
-                                  ),
-                                  const SizedBox(height: AppTheme.paddingSmall),
-                                  _buildSummaryRow(
-                                    'Total Expenses',
-                                    '₹${(summary.totalExpense + summary.totalBatta).toStringAsFixed(2)}',
-                                    iconData: Icons.money_off,
-                                    textColor:
-                                        Theme.of(context).colorScheme.error,
-                                  ),
-                                ],
+                              title: Text(
+                                team.name,
+                                style: Theme.of(context).textTheme.titleLarge,
                               ),
+                              subtitle: Text(
+                                'Members Reported: ${summary?.entriesCount ?? 0}',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              trailing: const Icon(Icons.chevron_right),
                             ),
+                            if (summary != null) ...[
+                              const Divider(height: 1),
+                              Padding(
+                                padding: const EdgeInsets.all(
+                                    AppTheme.paddingMedium),
+                                child: Column(
+                                  children: [
+                                    _buildSummaryRow(
+                                      'Total Collection',
+                                      '₹${summary.totalCollection.toStringAsFixed(2)}',
+                                      isHighlighted: true,
+                                      iconData: Icons.account_balance_wallet,
+                                    ),
+                                    const SizedBox(
+                                        height: AppTheme.paddingSmall),
+                                    _buildSummaryRow(
+                                      'Calendars Sold',
+                                      summary.totalSold.toString(),
+                                      iconData: Icons.calendar_today,
+                                    ),
+                                    const SizedBox(
+                                        height: AppTheme.paddingSmall),
+                                    _buildSummaryRow(
+                                      'Average per Calendar',
+                                      '₹${summary.averagePerCalendar.toStringAsFixed(2)}',
+                                      iconData: Icons.trending_up,
+                                      isHighlighted: true,
+                                    ),
+                                    const SizedBox(
+                                        height: AppTheme.paddingSmall),
+                                    _buildSummaryRow(
+                                      'Total Expenses',
+                                      '₹${(summary.totalExpense + summary.totalBatta).toStringAsFixed(2)}',
+                                      iconData: Icons.money_off,
+                                      textColor:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     );
                   },
