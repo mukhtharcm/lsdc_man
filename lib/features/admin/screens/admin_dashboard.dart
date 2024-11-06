@@ -13,12 +13,37 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
+  DateTime selectedDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
+    _loadData();
+  }
+
+  void _loadData() {
     context.read<TeamBloc>()
       ..add(LoadTeams())
-      ..add(LoadTeamSummaries());
+      ..add(LoadTeamSummaries(selectedDate));
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+      context.read<TeamBloc>().add(LoadTeamSummaries(selectedDate));
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    _loadData();
   }
 
   @override
@@ -33,81 +58,152 @@ class _AdminDashboardState extends State<AdminDashboard> {
           return Center(child: Text('Error: ${state.error}'));
         }
 
-        return Padding(
-          padding: const EdgeInsets.all(AppTheme.paddingMedium),
-          child: ListView.separated(
-            itemCount: state.teams.length,
-            separatorBuilder: (context, index) =>
-                const SizedBox(height: AppTheme.paddingSmall),
-            itemBuilder: (context, index) {
-              final team = state.teams[index];
-              final summary = state.teamSummaries[team.id];
-
-              return Card(
-                child: Column(
-                  children: [
-                    ListTile(
-                      contentPadding:
-                          const EdgeInsets.all(AppTheme.paddingMedium),
-                      title: Text(
-                        team.name,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      subtitle: Text(
-                        'Members Reported: ${summary?.entriesCount ?? 0}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                TeamDetailsScreen(teamId: team.id),
+        return RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.all(AppTheme.paddingMedium),
+                child: Card(
+                  child: InkWell(
+                    onTap: () => _selectDate(context),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding:
+                                const EdgeInsets.all(AppTheme.paddingSmall),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.1),
+                              borderRadius:
+                                  BorderRadius.circular(AppTheme.radiusSmall),
+                            ),
+                            child: Icon(
+                              Icons.calendar_today,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
-                        );
-                      },
+                          const SizedBox(width: AppTheme.paddingMedium),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Summary for',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _formatDate(selectedDate),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.edit_calendar,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ],
+                      ),
                     ),
-                    if (summary != null) ...[
-                      const Divider(height: 1),
-                      Padding(
-                        padding: const EdgeInsets.all(AppTheme.paddingMedium),
-                        child: Column(
-                          children: [
-                            _buildSummaryRow(
-                              'Total Collection',
-                              '₹${summary.totalCollection.toStringAsFixed(2)}',
-                              isHighlighted: true,
-                              iconData: Icons.account_balance_wallet,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                  itemCount: state.teams.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: AppTheme.paddingSmall),
+                  itemBuilder: (context, index) {
+                    final team = state.teams[index];
+                    final summary = state.teamSummaries[team.id];
+
+                    return Card(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            contentPadding:
+                                const EdgeInsets.all(AppTheme.paddingMedium),
+                            title: Text(
+                              team.name,
+                              style: Theme.of(context).textTheme.titleLarge,
                             ),
-                            const SizedBox(height: AppTheme.paddingSmall),
-                            _buildSummaryRow(
-                              'Calendars Sold',
-                              summary.totalSold.toString(),
-                              iconData: Icons.calendar_today,
+                            subtitle: Text(
+                              'Members Reported: ${summary?.entriesCount ?? 0}',
+                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            const SizedBox(height: AppTheme.paddingSmall),
-                            _buildSummaryRow(
-                              'Average per Calendar',
-                              '₹${summary.averagePerCalendar.toStringAsFixed(2)}',
-                              iconData: Icons.trending_up,
-                              isHighlighted: true,
-                            ),
-                            const SizedBox(height: AppTheme.paddingSmall),
-                            _buildSummaryRow(
-                              'Total Expenses',
-                              '₹${(summary.totalExpense + summary.totalBatta).toStringAsFixed(2)}',
-                              iconData: Icons.money_off,
-                              textColor: Theme.of(context).colorScheme.error,
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      TeamDetailsScreen(teamId: team.id),
+                                ),
+                              );
+                            },
+                          ),
+                          if (summary != null) ...[
+                            const Divider(height: 1),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.all(AppTheme.paddingMedium),
+                              child: Column(
+                                children: [
+                                  _buildSummaryRow(
+                                    'Total Collection',
+                                    '₹${summary.totalCollection.toStringAsFixed(2)}',
+                                    isHighlighted: true,
+                                    iconData: Icons.account_balance_wallet,
+                                  ),
+                                  const SizedBox(height: AppTheme.paddingSmall),
+                                  _buildSummaryRow(
+                                    'Calendars Sold',
+                                    summary.totalSold.toString(),
+                                    iconData: Icons.calendar_today,
+                                  ),
+                                  const SizedBox(height: AppTheme.paddingSmall),
+                                  _buildSummaryRow(
+                                    'Average per Calendar',
+                                    '₹${summary.averagePerCalendar.toStringAsFixed(2)}',
+                                    iconData: Icons.trending_up,
+                                    isHighlighted: true,
+                                  ),
+                                  const SizedBox(height: AppTheme.paddingSmall),
+                                  _buildSummaryRow(
+                                    'Total Expenses',
+                                    '₹${(summary.totalExpense + summary.totalBatta).toStringAsFixed(2)}',
+                                    iconData: Icons.money_off,
+                                    textColor:
+                                        Theme.of(context).colorScheme.error,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
-                        ),
+                        ],
                       ),
-                    ],
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ],
           ),
         );
       },
@@ -152,5 +248,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
         ),
       ],
     );
+  }
+
+  String _formatDate(DateTime date) {
+    // Check if date is today
+    final now = DateTime.now();
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
+      return 'Today';
+    }
+
+    // Check if date is yesterday
+    final yesterday = now.subtract(const Duration(days: 1));
+    if (date.year == yesterday.year &&
+        date.month == yesterday.month &&
+        date.day == yesterday.day) {
+      return 'Yesterday';
+    }
+
+    // Format other dates
+    return '${date.day}/${date.month}/${date.year}';
   }
 }

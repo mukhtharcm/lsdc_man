@@ -21,6 +21,10 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> {
     context.read<TeamBloc>().add(LoadTeamDetails(widget.teamId));
   }
 
+  Future<void> _onRefresh() async {
+    context.read<TeamBloc>().add(LoadTeamDetails(widget.teamId));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TeamBloc, TeamState>(
@@ -42,9 +46,11 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> {
           appBar: AppBar(
             title: Text(team.name),
           ),
-          body: Padding(
-            padding: const EdgeInsets.all(AppTheme.paddingMedium),
+          body: RefreshIndicator(
+            onRefresh: _onRefresh,
             child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppTheme.paddingMedium),
               itemCount: team.members?.length ?? 0,
               separatorBuilder: (context, index) =>
                   const SizedBox(height: AppTheme.paddingSmall),

@@ -10,15 +10,18 @@ class TeamRepository {
 
   TeamRepository(this._pb);
 
+  // Add getter for PocketBase instance
+  PocketBase get pb => _pb;
+
   Future<List<Team>> getTeams() async {
     final records = await _pb.collection('teams').getList();
     return records.items.map((record) => Team.fromRecord(record)).toList();
   }
 
-  Future<Map<String, TeamSummary>> getTeamsSummaryForToday() async {
-    final today = DateTime.now();
-    final startOfDay = "${today.toIso8601String().split('T')[0]} 00:00:00.000Z";
-    final endOfDay = "${today.toIso8601String().split('T')[0]} 23:59:59.999Z";
+  Future<Map<String, TeamSummary>> getTeamsSummaryForToday(
+      DateTime date) async {
+    final startOfDay = "${date.toIso8601String().split('T')[0]} 00:00:00.000Z";
+    final endOfDay = "${date.toIso8601String().split('T')[0]} 23:59:59.999Z";
 
     debugPrint('Getting team summaries between $startOfDay and $endOfDay');
 

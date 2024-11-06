@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:pocketbase/pocketbase.dart';
 import '../../models/team.dart';
 import '../../models/team_summary.dart';
 import '../../repositories/team_repository.dart';
@@ -21,7 +23,14 @@ class LoadTeamDetails extends TeamEvent {
   List<Object?> get props => [teamId];
 }
 
-class LoadTeamSummaries extends TeamEvent {}
+class LoadTeamSummaries extends TeamEvent {
+  final DateTime date;
+
+  LoadTeamSummaries(this.date);
+
+  @override
+  List<Object?> get props => [date];
+}
 
 // States
 class TeamState extends Equatable {
@@ -62,6 +71,9 @@ class TeamState extends Equatable {
 
 class TeamBloc extends Bloc<TeamEvent, TeamState> {
   final TeamRepository _teamRepository;
+  UnsubscribeFunc? _entriesUnsubscribe;
+  UnsubscribeFunc? _teamsUnsubscribe;
+  DateTime? _currentDate;
 
   TeamBloc({required TeamRepository teamRepository})
       : _teamRepository = teamRepository,
@@ -79,12 +91,52 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
         teams: teams,
         isLoading: false,
       ));
+
+      // Subscribe to teams collection changes
+      _teamsUnsubscribe?.call();
+      _teamsUnsubscribe =
+          await _teamRepository.pb.collection('teams').subscribe('*', (e) {
+        // Instead of directly adding event, trigger a reload
+        _reloadTeams();
+      });
     } catch (e) {
       emit(state.copyWith(
         error: e.toString(),
         isLoading: false,
       ));
     }
+  }
+
+  Future<void> _onLoadTeamSummaries(
+    LoadTeamSummaries event,
+    Emitter<TeamState> emit,
+  ) async {
+    try {
+      _currentDate = event.date;
+      final summaries =
+          await _teamRepository.getTeamsSummaryForToday(event.date);
+      emit(state.copyWith(teamSummaries: summaries));
+
+      // Cancel existing subscription if any
+      await _entriesUnsubscribe?.call();
+
+      // Subscribe to dairy_entries collection changes
+      _entriesUnsubscribe = await _teamRepository.pb
+          .collection('dairy_entries')
+          .subscribe('*', (e) {
+        // Instead of directly emitting, trigger a reload
+        if (_currentDate != null) {
+          add(LoadTeamSummaries(_currentDate!));
+        }
+      });
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  // Helper method to reload teams
+  void _reloadTeams() {
+    add(LoadTeams());
   }
 
   Future<void> _onLoadTeamDetails(
@@ -104,15 +156,10 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
     }
   }
 
-  Future<void> _onLoadTeamSummaries(
-    LoadTeamSummaries event,
-    Emitter<TeamState> emit,
-  ) async {
-    try {
-      final summaries = await _teamRepository.getTeamsSummaryForToday();
-      emit(state.copyWith(teamSummaries: summaries));
-    } catch (e) {
-      emit(state.copyWith(error: e.toString()));
-    }
+  @override
+  Future<void> close() async {
+    await _entriesUnsubscribe?.call();
+    await _teamsUnsubscribe?.call();
+    return super.close();
   }
 }
